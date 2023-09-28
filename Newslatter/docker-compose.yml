@@ -1,0 +1,50 @@
+version: '3'
+services:
+  mydb:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal_network
+
+  myapp:
+    build:
+      context: ./app
+    ports:
+      - "1000:1000"
+    depends_on:
+      - mydb
+    environment:
+      DB_HOST: mydb
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: mydatabase
+    networks:
+      - internal_network
+
+  mygateway:
+    build:
+      context: ./gateway
+    ports:
+      - "2000:2000"
+    depends_on:
+      - mydb
+    environment:
+      DB_HOST: mydb
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: mydatabase
+    networks:
+      - internal_network
+
+networks:
+  internal_network:
+
+volumes:
+  postgres_data:
